@@ -1,0 +1,25 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: finrag-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: finrag
+      POSTGRES_PASSWORD: finrag
+      POSTGRES_DB: finrag
+    ports:
+      - "5432:5432"
+    volumes:
+      - finrag-db-data:/var/lib/postgresql/data
+      - ./src/finrag/knowledge_base/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finrag -d finrag"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # api, ui, and grafana services are added in later milestones
+  # (see docs/PROJECT_PLAN.md, Days 6-7) once there's an app to run.
+
+volumes:
+  finrag-db-data:

@@ -1,0 +1,35 @@
+[project]
+name = "market-narrator"
+version = "0.1.0"
+description = "Agentic RAG application for historical stock market analysis, built on Yahoo Finance data."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "yfinance>=0.2.40",
+    "pandas>=2.2",
+    "pyarrow>=17.0",
+    "python-dotenv>=1.2.2",
+    "pydantic-settings>=2.5",
+    "groq>=1.5.0",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "streamlit>=1.40",
+    "psycopg[binary]>=3.2",
+    "pgvector>=0.3",
+    "fastembed>=0.4",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.7",
+    "pytest>=8.3",
+    "jupyter>=1.1.1",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
