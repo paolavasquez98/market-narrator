@@ -50,6 +50,19 @@ def _read_cache(ticker: str, settings: Settings) -> pd.DataFrame:
     return pd.read_parquet(cache_path(ticker, settings))
 
 
+def load_cached_prices(ticker: str, settings: Settings | None = None) -> pd.DataFrame:
+    """Public accessor for downstream modules (e.g. compute_stats, build_documents)
+    that just want the already-fetched daily OHLCV frame for one ticker.
+    """
+    settings = settings or get_settings()
+    if not _is_cached(ticker, settings):
+        raise FileNotFoundError(
+            f"No cached price data for {ticker}. Run fetch_universe() first "
+            f"(e.g. `uv run python -m finrag.ingestion.fetch_prices`)."
+        )
+    return _read_cache(ticker, settings)
+
+
 def _clean_single_ticker_frame(df: pd.DataFrame, ticker: str) -> pd.DataFrame:
     """Normalize one ticker's raw yfinance frame to a flat, predictable shape."""
     df = df.dropna(how="all")

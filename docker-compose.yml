@@ -18,8 +18,24 @@ services:
       timeout: 5s
       retries: 10
 
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: finrag-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8085:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      db:
+        condition: service_healthy
+        
   # api, ui, and grafana services are added in later milestones
   # (see docs/PROJECT_PLAN.md, Days 6-7) once there's an app to run.
 
 volumes:
   finrag-db-data:
+  pgadmin-data:
