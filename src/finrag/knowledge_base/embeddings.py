@@ -19,6 +19,7 @@ width has to change too.
 from __future__ import annotations
 
 from collections.abc import Iterable
+from functools import lru_cache
 
 EMBEDDING_MODEL_NAME = "BAAI/bge-small-en-v1.5"
 EMBEDDING_DIM = 384
@@ -39,3 +40,14 @@ class Embedder:
     def embed(self, texts: Iterable[str]) -> list[list[float]]:
         """Embed a batch of texts. Order is preserved."""
         return [vector.tolist() for vector in self._model.embed(list(texts))]
+
+
+@lru_cache
+def get_embedder() -> Embedder:
+    """Process-wide cached Embedder instance. Loading the ONNX model has a
+    real one-time cost (reading model files, initializing the runtime);
+    the RAG pipeline embeds one query per request and shouldn't pay that
+    cost again on every call. Same `@lru_cache`-as-singleton pattern as
+    `config.get_settings()`.
+    """
+    return Embedder()

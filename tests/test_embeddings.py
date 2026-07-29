@@ -1,8 +1,13 @@
 """Tests for the Embedder wrapper, using a stubbed fastembed model so no
 network call or model download is required. This tests that our wrapper
-correctly adapts fastembed's numpy-array output to plain lists (what
-psycopg/pgvector expect) and preserves order -- not the embedding model's
-actual output quality.
+correctly adapts fastembed's numpy-array output to plain lists (JSON- and
+type-hint-friendly, and easy to pass around outside the knowledge_base
+package) and preserves order -- not the embedding model's actual output
+quality.
+
+Note: plain `list[float]` still needs an explicit `::vector` SQL cast
+wherever it's compared against a `vector` column (see vector_store.py) --
+psycopg's default array dumper, not pgvector's, handles raw Python lists.
 """
 
 import sys

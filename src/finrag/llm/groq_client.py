@@ -26,7 +26,8 @@ class GroqClient(LLMClient):
             model=self._model,
             messages=messages,
             tools=tools,
-            tool_choice="auto" if tools else None,
+            # tool_choice="auto" if tools else None,
+            tool_choice="none",
             temperature=temperature,
         )
         choice = response.choices[0].message

@@ -13,10 +13,8 @@ from __future__ import annotations
 
 from datetime import date
 
-import psycopg
 import pytest
 
-from finrag.config.settings import get_settings
 from finrag.ingestion.build_documents import DocumentRecord
 from finrag.knowledge_base.vector_store import count_documents, get_connection, upsert_documents
 
@@ -24,24 +22,7 @@ TEST_DOC_ID = "TESTTICKER:weekly:2024-01-01"
 
 
 @pytest.fixture
-def settings():
-    return get_settings()
-
-
-@pytest.fixture(autouse=True)
-def _skip_if_db_unreachable(settings):
-    try:
-        conn = psycopg.connect(settings.database_url, connect_timeout=2)
-        conn.close()
-    except psycopg.OperationalError:
-        pytest.skip(
-            "Postgres not reachable at "
-            f"{settings.database_url} -- run `docker compose up -d` to enable this test"
-        )
-
-
-@pytest.fixture
-def cleanup_test_doc(settings):
+def cleanup_test_doc(settings, skip_if_db_unreachable):
     yield
     with get_connection(settings) as conn:
         with conn.cursor() as cur:
@@ -91,6 +72,6 @@ def test_upsert_is_idempotent_by_doc_id(settings, cleanup_test_doc):
     assert stored_content == "TESTTICKER actually rose 6% this week."
 
 
-def test_upsert_raises_on_length_mismatch(settings):
+def test_upsert_raises_on_length_mismatch(settings, skip_if_db_unreachable):
     with get_connection(settings) as conn, pytest.raises(ValueError, match="length mismatch"):
         upsert_documents(conn, [_fake_record()], [])

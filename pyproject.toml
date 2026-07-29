@@ -29,6 +29,7 @@ dev = [
 
 [project.scripts]
 finrag-ingest = "finrag.ingestion.run_ingestion:main"
+finrag-ask = "finrag.rag.pipeline:main"
 
 [build-system]
 requires = ["hatchling"]
