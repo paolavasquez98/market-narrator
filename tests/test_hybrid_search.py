@@ -53,10 +53,14 @@ def test_hybrid_search_combines_both_methods_and_respects_top_k(monkeypatch):
     import finrag.retrieval.hybrid_search as hs
 
     monkeypatch.setattr(
-        hs, "vector_search", lambda conn, query_embedding, top_k: [_result("A"), _result("B")]
+        hs,
+        "vector_search",
+        lambda conn, query_embedding, top_k, tickers=None: [_result("A"), _result("B")],
     )
     monkeypatch.setattr(
-        hs, "keyword_search", lambda conn, query_text, top_k: [_result("B"), _result("C")]
+        hs,
+        "keyword_search",
+        lambda conn, query_text, top_k, tickers=None: [_result("B"), _result("C")],
     )
 
     results = hs.hybrid_search(conn=None, query_text="q", query_embedding=[0.1], top_k=2)
@@ -64,3 +68,27 @@ def test_hybrid_search_combines_both_methods_and_respects_top_k(monkeypatch):
     assert len(results) == 2
     # "B" was found by both methods, so it should be ranked first.
     assert results[0].doc_id == "B"
+
+
+def test_hybrid_search_forwards_ticker_filter_to_both_methods(monkeypatch):
+    import finrag.retrieval.hybrid_search as hs
+
+    calls = {}
+
+    def _fake_vector_search(conn, query_embedding, top_k, tickers=None):
+        calls["vector_tickers"] = tickers
+        return [_result("A")]
+
+    def _fake_keyword_search(conn, query_text, top_k, tickers=None):
+        calls["keyword_tickers"] = tickers
+        return [_result("A")]
+
+    monkeypatch.setattr(hs, "vector_search", _fake_vector_search)
+    monkeypatch.setattr(hs, "keyword_search", _fake_keyword_search)
+
+    hs.hybrid_search(
+        conn=None, query_text="q", query_embedding=[0.1], top_k=2, tickers=["NVDA"]
+    )
+
+    assert calls["vector_tickers"] == ["NVDA"]
+    assert calls["keyword_tickers"] == ["NVDA"]

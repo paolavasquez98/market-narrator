@@ -64,7 +64,17 @@ def _max_drawdown_pct(close: pd.Series) -> float:
     return float(drawdown.min() * 100)
 
 
-def _annualized_volatility_pct(daily_returns: pd.Series) -> float:
+def return_pct(start_price: float, end_price: float) -> float:
+    """Percentage change from `start_price` to `end_price`. Public (not
+    prefixed `_`) because `agent/tools.py`'s `get_return` tool reuses this
+    exact formula -- the narrative documents and the agent's deterministic
+    tool answers must agree on how "return" is defined, or a user could get
+    two different numbers for what looks like the same question.
+    """
+    return (end_price / start_price - 1) * 100
+
+
+def annualized_volatility_pct(daily_returns: pd.Series) -> float:
     if len(daily_returns) < 2:
         return 0.0
     return float(daily_returns.std() * math.sqrt(TRADING_DAYS_PER_YEAR) * 100)
@@ -105,12 +115,12 @@ def compute_period_stats(df_period: pd.DataFrame, ticker: str, granularity: Gran
         period_end=df_period["Date"].iloc[-1].date(),
         start_price=start_price,
         end_price=end_price,
-        return_pct=(end_price / start_price - 1) * 100,
+        return_pct=return_pct(start_price, end_price),
         high=float(df_period["High"].max()),
         low=float(df_period["Low"].min()),
         max_drawdown_pct=_max_drawdown_pct(close),
         avg_volume=float(df_period["Volume"].mean()),
-        volatility_annualized_pct=_annualized_volatility_pct(daily_returns),
+        volatility_annualized_pct=annualized_volatility_pct(daily_returns),
         notable_moves=_notable_moves(df_period, daily_returns),
     )
 

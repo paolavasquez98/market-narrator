@@ -22,14 +22,22 @@ class GroqClient(LLMClient):
         tools: list[ToolSchema] | None = None,
         temperature: float = 0.0,
     ) -> LLMResponse:
-        response = self._client.chat.completions.create(
-            model=self._model,
-            messages=messages,
-            tools=tools,
-            # tool_choice="auto" if tools else None,
-            tool_choice="none",
-            temperature=temperature,
-        )
+        # Only include `tools`/`tool_choice` in the request at all when tools
+        # were actually provided. Groq's Python SDK (like OpenAI's) treats an
+        # explicitly-passed `None` as a real value distinct from "argument
+        # not given" -- omitting the parameter is what actually excludes it
+        # from the request body. See docs/learning/day03_learning.md,
+        # section 13, for the full investigation.
+        kwargs: dict[str, object] = {
+            "model": self._model,
+            "messages": messages,
+            "temperature": temperature,
+        }
+        if tools:
+            kwargs["tools"] = tools
+            kwargs["tool_choice"] = "auto"
+
+        response = self._client.chat.completions.create(**kwargs)
         choice = response.choices[0].message
 
         tool_calls = [

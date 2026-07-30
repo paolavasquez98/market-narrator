@@ -33,6 +33,42 @@ def test_complete_returns_plain_text_response(mock_groq_cls):
 
 
 @patch("finrag.llm.groq_client.Groq")
+def test_complete_without_tools_omits_tools_and_tool_choice_entirely(mock_groq_cls):
+    """Regression test for the `tool_choice=None` bug: Groq's API rejects a
+    literal JSON `null` for `tool_choice` (`Only allowed string values for
+    'tool_choice' are [none, auto, required]`), and the SDK only strips
+    parameters that are truly *omitted* -- an explicit `None` is still sent
+    as `null`. So when no tools are given, `tools`/`tool_choice` must not
+    appear as keyword arguments at all, not just be set to `None`.
+    """
+    mock_client = MagicMock()
+    mock_client.chat.completions.create.return_value = _fake_groq_response(content="ok")
+    mock_groq_cls.return_value = mock_client
+
+    client = GroqClient(api_key="fake-key", model="llama-3.3-70b-versatile")
+    client.complete([{"role": "user", "content": "hello"}])
+
+    call_kwargs = mock_client.chat.completions.create.call_args.kwargs
+    assert "tools" not in call_kwargs
+    assert "tool_choice" not in call_kwargs
+
+
+@patch("finrag.llm.groq_client.Groq")
+def test_complete_with_tools_sets_tool_choice_auto(mock_groq_cls):
+    mock_client = MagicMock()
+    mock_client.chat.completions.create.return_value = _fake_groq_response(content="ok")
+    mock_groq_cls.return_value = mock_client
+
+    client = GroqClient(api_key="fake-key", model="llama-3.3-70b-versatile")
+    tools = [{"type": "function", "function": {"name": "get_return"}}]
+    client.complete([{"role": "user", "content": "hello"}], tools=tools)
+
+    call_kwargs = mock_client.chat.completions.create.call_args.kwargs
+    assert call_kwargs["tools"] == tools
+    assert call_kwargs["tool_choice"] == "auto"
+
+
+@patch("finrag.llm.groq_client.Groq")
 def test_complete_parses_tool_calls(mock_groq_cls):
     fake_tool_call = SimpleNamespace(
         id="call_1",

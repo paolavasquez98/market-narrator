@@ -22,6 +22,7 @@ much more than being buried at rank 40.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import replace
 
 import psycopg
@@ -63,6 +64,7 @@ def hybrid_search(
     query_embedding: list[float],
     top_k: int = 10,
     candidates_per_method: int = 30,
+    tickers: Sequence[str] | None = None,
 ) -> list[SearchResult]:
     """Run vector and keyword search independently, then fuse.
 
@@ -73,9 +75,16 @@ def hybrid_search(
     search's top-`top_k` might unfairly look like it "wasn't found" by
     keyword search at all, when a slightly larger candidate pool would
     have included it.
+
+    `tickers`, when given (typically from `query_rewriter.rewrite_query`),
+    is passed straight through to both underlying searches as a hard
+    `WHERE ticker = ANY(...)` filter -- this is what fixes the Day 3
+    "Nvidia retrieves AMD" failure mode: once the ticker is resolved to
+    NVDA, documents from other tickers are excluded before ranking even
+    happens, not just ranked lower.
     """
-    vector_results = vector_search(conn, query_embedding, top_k=candidates_per_method)
-    keyword_results = keyword_search(conn, query_text, top_k=candidates_per_method)
+    vector_results = vector_search(conn, query_embedding, top_k=candidates_per_method, tickers=tickers)
+    keyword_results = keyword_search(conn, query_text, top_k=candidates_per_method, tickers=tickers)
 
     fused = reciprocal_rank_fusion(vector_results, keyword_results)
     return fused[:top_k]
