@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import logging
 import random
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 
 import pandas as pd
@@ -49,7 +50,13 @@ CANDIDATE_POOL = 20
 
 # Same seed every run -> the same A/B position assignment every time (see
 # _judge_without_position_bias below), matching this project's general
-# "reproducible metrics" goal.
+# "reproducible metrics" goal. Combined with each question's own text
+# (see evaluate_tool_calling_impact) rather than drawn sequentially from
+# one shared Random -- that makes a question's swap decision depend only
+# on (seed, question), not on how many other questions ran before it in
+# the same session, which is what makes resuming a partially-completed
+# run (eval/evaluate_llm.py, after a Groq rate limit) reproduce the same
+# assignment a single uninterrupted run would have produced.
 POSITION_SEED = 7
 
 EVAL_QUESTIONS: list[dict[str, str]] = [
@@ -138,14 +145,33 @@ def _judge_without_position_bias(
     return with_tools_score, without_tools_score, verdict.reasoning
 
 
+def filter_pending_questions(
+    questions: list[dict[str, str]], already_done: set[str]
+) -> list[dict[str, str]]:
+    """Drop any question whose text is already in `already_done`. This is
+    the resume mechanism eval/evaluate_llm.py uses: a Groq rate-limit
+    interruption partway through the question set shouldn't force paying
+    for (and re-judging) work that already produced a saved result.
+    """
+    return [q for q in questions if q["question"] not in already_done]
+
+
 def evaluate_tool_calling_impact(
     conn: psycopg.Connection,
     llm: LLMClient,
     embedder: Embedder,
     reranker: Reranker,
     questions: list[dict[str, str]] = EVAL_QUESTIONS,
+    on_row: Callable[[LLMEvalRow], None] | None = None,
 ) -> list[LLMEvalRow]:
-    rng = random.Random(POSITION_SEED)
+    """Evaluate each question, optionally reporting each completed row to
+    `on_row` as soon as it's ready (rather than only once the whole batch
+    finishes). This is what lets a caller persist progress incrementally:
+    if a later question raises (e.g. `groq.RateLimitError` from hitting
+    the daily token budget), every row already reported via `on_row` is
+    safely saved even though this function's own return value never comes
+    back for that call.
+    """
     rows: list[LLMEvalRow] = []
 
     for item in questions:
@@ -158,6 +184,11 @@ def evaluate_tool_calling_impact(
         with_tools_answer = generate_with_tools(llm, question, retrieved)
         without_tools_answer = generate_without_tools(llm, question, retrieved)
 
+        # Seeded per-question (not drawn sequentially from one shared
+        # Random) so the swap decision is stable regardless of which
+        # other questions ran before this one in the same session -- see
+        # the POSITION_SEED comment above.
+        rng = random.Random(f"{POSITION_SEED}:{question}")
         judged = _judge_without_position_bias(
             llm, question, context, with_tools_answer, without_tools_answer, rng
         )
@@ -166,15 +197,16 @@ def evaluate_tool_calling_impact(
             continue
 
         with_tools_score, without_tools_score, reasoning = judged
-        rows.append(
-            LLMEvalRow(
-                question=question,
-                category=category,
-                with_tools_score=with_tools_score,
-                without_tools_score=without_tools_score,
-                reasoning=reasoning,
-            )
+        row = LLMEvalRow(
+            question=question,
+            category=category,
+            with_tools_score=with_tools_score,
+            without_tools_score=without_tools_score,
+            reasoning=reasoning,
         )
+        rows.append(row)
+        if on_row is not None:
+            on_row(row)
 
     return rows
 

@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 
 from finrag.llm.base import LLMClient, LLMResponse
-from finrag.retrieval.query_rewriter import rewrite_query
+from finrag.retrieval.query_rewriter import _build_instructions, rewrite_query
 
 
 class _FakeLLM(LLMClient):
@@ -62,3 +62,15 @@ def test_rewrite_query_defaults_missing_keys_gracefully():
 
     assert intent.tickers == []
     assert intent.rewritten_query == "original question"
+
+
+# Day 6: eval/evaluate_retrieval.py showed hybrid_rerank_rewrite scoring
+# worse than hybrid_rerank -- traced to the rewrite prompt having no
+# instruction to preserve exact dates, which are the main signal that
+# distinguishes one period's document from another for the same ticker
+# (see the module docstring's "Day 6 finding"). This just guards that the
+# instruction stays in the prompt; it can't verify a real model obeys it.
+def test_rewrite_instructions_tell_model_to_preserve_dates():
+    instructions = _build_instructions()
+    assert "preserve" in instructions.lower()
+    assert "date" in instructions.lower()

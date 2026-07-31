@@ -1,0 +1,50 @@
+# FastAPI service image. Build from the repo root:
+#   docker build -f Dockerfile.api -t market-narrator-api .
+# (docker-compose.yml's `api` service does this automatically.)
+#
+# NOTE: pyproject.toml gained a new dependency (httpx) on the same day
+# this Dockerfile was written. `uv sync --frozen` below requires uv.lock
+# to already match pyproject.toml -- run `uv lock` locally before building
+# if you haven't synced since then, or the build will fail fast with a
+# clear "lock file does not match" error rather than silently drifting.
+FROM python:3.12-slim
+
+# onnxruntime (fastembed's backend for the embedding and reranking models)
+# needs libgomp for its OpenMP-based threading. python:3.12-slim doesn't
+# ship it, and its absence fails as an import error deep inside fastembed
+# rather than an obviously Docker-related message -- installed explicitly
+# here to avoid that surprise.
+RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy the pinned `uv` binary itself rather than pip-installing it into
+# the app image -- keeps this image's own dependency surface to exactly
+# what the project needs.
+COPY --from=ghcr.io/astral-sh/uv:0.5 /uv /uvx /usr/local/bin/
+
+WORKDIR /app
+
+# Install dependencies before copying application code, so `docker build`
+# only re-runs the (slow) dependency resolution/install step when
+# pyproject.toml/uv.lock actually change, not on every code edit.
+COPY pyproject.toml uv.lock README.md  ./
+RUN uv sync --frozen --no-install-project --no-dev
+
+# Only src/ is needed at runtime -- eval/, tests/, docs/, ui/ are not part
+# of the API's dependency graph and would just bloat the image.
+COPY src/ ./src/
+RUN uv sync --frozen --no-dev
+
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    FASTEMBED_CACHE_PATH=/app/.cache/fastembed
+
+# `finrag.config.settings.PROJECT_ROOT` resolves to this WORKDIR (three
+# parents up from src/finrag/config/settings.py) -- docker-compose.yml
+# mounts the host's ingested `data/` directory to /app/data so the agent
+# tools (agent/tools.py, which read cached price Parquet files directly,
+# not just Postgres) work inside the container. Without that mount, every
+# tool call fails with FileNotFoundError even though retrieval works fine.
+EXPOSE 8000
+
+CMD ["uvicorn", "finrag.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

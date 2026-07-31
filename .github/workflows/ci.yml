@@ -43,7 +43,7 @@ jobs:
           PGPASSWORD: finrag
 
       - name: Lint
-        run: uv run ruff check src tests
+        run: uv run ruff check src tests eval ui
 
       - name: Test
         run: uv run pytest

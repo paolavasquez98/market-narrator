@@ -1,0 +1,15 @@
+# Tells Grafana to load every dashboard JSON file in this directory on
+# startup and keep them in sync if the file changes -- no manual "Import
+# dashboard" step needed after `docker compose up`.
+apiVersion: 1
+
+providers:
+  - name: Market Narrator
+    orgId: 1
+    folder: ""
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards

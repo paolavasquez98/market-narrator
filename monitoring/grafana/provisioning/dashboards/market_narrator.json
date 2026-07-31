@@ -1,0 +1,282 @@
+{
+  "id": null,
+  "uid": "market-narrator-overview",
+  "title": "Market Narrator \u2014 Query Monitoring",
+  "tags": [
+    "market-narrator"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Total questions asked",
+      "datasource": {
+        "type": "postgres",
+        "uid": "market-narrator-postgres"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 8,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "market-narrator-postgres"
+          },
+          "format": "table",
+          "rawSql": "SELECT count(*) AS total FROM query_logs WHERE $__timeFilter(created_at)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Average latency",
+      "datasource": {
+        "type": "postgres",
+        "uid": "market-narrator-postgres"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 0,
+        "w": 8,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "market-narrator-postgres"
+          },
+          "format": "table",
+          "rawSql": "SELECT avg(latency_ms) AS avg_latency FROM query_logs WHERE $__timeFilter(created_at)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "P95 latency",
+      "datasource": {
+        "type": "postgres",
+        "uid": "market-narrator-postgres"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 8,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "market-narrator-postgres"
+          },
+          "format": "table",
+          "rawSql": "SELECT percentile_cont(0.95) WITHIN GROUP (ORDER BY latency_ms) AS p95_latency FROM query_logs WHERE $__timeFilter(created_at)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Query volume over time",
+      "datasource": {
+        "type": "postgres",
+        "uid": "market-narrator-postgres"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "market-narrator-postgres"
+          },
+          "format": "time_series",
+          "rawSql": "SELECT $__timeGroup(created_at, '1h') AS time, count(*) AS queries FROM query_logs WHERE $__timeFilter(created_at) GROUP BY 1 ORDER BY 1",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Average latency over time",
+      "datasource": {
+        "type": "postgres",
+        "uid": "market-narrator-postgres"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "market-narrator-postgres"
+          },
+          "format": "time_series",
+          "rawSql": "SELECT $__timeGroup(created_at, '1h') AS time, avg(latency_ms) AS avg_latency_ms FROM query_logs WHERE $__timeFilter(created_at) GROUP BY 1 ORDER BY 1",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "piechart",
+      "title": "Feedback (thumbs up vs. down)",
+      "datasource": {
+        "type": "postgres",
+        "uid": "market-narrator-postgres"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "market-narrator-postgres"
+          },
+          "format": "table",
+          "rawSql": "SELECT CASE WHEN feedback = 1 THEN 'thumbs up' WHEN feedback = -1 THEN 'thumbs down' ELSE 'no feedback yet' END AS label, count(*) AS count FROM query_logs WHERE $__timeFilter(created_at) GROUP BY 1",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "piechart",
+      "title": "Tool-calling usage",
+      "datasource": {
+        "type": "postgres",
+        "uid": "market-narrator-postgres"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 12,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "market-narrator-postgres"
+          },
+          "format": "table",
+          "rawSql": "SELECT CASE WHEN jsonb_array_length(tool_calls) > 0 THEN 'used a tool' ELSE 'context only' END AS label, count(*) AS count FROM query_logs WHERE $__timeFilter(created_at) GROUP BY 1",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "barchart",
+      "title": "Most-asked-about tickers",
+      "datasource": {
+        "type": "postgres",
+        "uid": "market-narrator-postgres"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 12,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "market-narrator-postgres"
+          },
+          "format": "table",
+          "rawSql": "SELECT ticker, count(*) AS asks FROM query_logs, unnest(extracted_tickers) AS ticker WHERE $__timeFilter(created_at) GROUP BY 1 ORDER BY asks DESC LIMIT 10",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "table",
+      "title": "Recent queries",
+      "datasource": {
+        "type": "postgres",
+        "uid": "market-narrator-postgres"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 24,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "market-narrator-postgres"
+          },
+          "format": "table",
+          "rawSql": "SELECT created_at, question, retrieval_method, latency_ms, feedback FROM query_logs WHERE $__timeFilter(created_at) ORDER BY created_at DESC LIMIT 50",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

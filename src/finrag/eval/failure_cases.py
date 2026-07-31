@@ -21,6 +21,7 @@ from scratch.
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
 
 from finrag.rag.pipeline import answer_question
@@ -102,26 +103,45 @@ class FailureCaseResult:
     answer: str
 
 
-def run_failure_cases(cases: list[FailureCase] = FAILURE_CASES) -> list[FailureCaseResult]:
+def filter_pending_cases(cases: list[FailureCase], already_done: set[str]) -> list[FailureCase]:
+    """Drop any case whose id is already in `already_done` -- the same
+    resume mechanism as llm_eval.filter_pending_questions, keyed by
+    FailureCase.id instead of question text since these questions aren't
+    guaranteed unique the same way the LLM-eval question set is.
+    """
+    return [c for c in cases if c.id not in already_done]
+
+
+def run_failure_cases(
+    cases: list[FailureCase] = FAILURE_CASES,
+    on_result: Callable[[FailureCaseResult], None] | None = None,
+) -> list[FailureCaseResult]:
     """Run the full pipeline (rag.pipeline.answer_question, the same path
     finrag-ask uses) against each known-tricky question and capture what
     actually happened. Not scored -- see module docstring.
+
+    `on_result`, if given, is called with each result as soon as it's
+    ready, so eval/run_failure_cases.py can persist progress incrementally
+    and survive a Groq rate-limit interruption without losing completed
+    cases -- same pattern as llm_eval.evaluate_tool_calling_impact's
+    `on_row`.
     """
     results = []
     for case in cases:
         logger.info("Running failure case %s: %r", case.id, case.question)
         rag_answer = answer_question(case.question)
-        results.append(
-            FailureCaseResult(
-                id=case.id,
-                category=case.category,
-                question=case.question,
-                known_issue=case.known_issue,
-                rewritten_query=rag_answer.rewritten_query,
-                resolved_tickers=rag_answer.resolved_tickers,
-                answer=rag_answer.answer,
-            )
+        result = FailureCaseResult(
+            id=case.id,
+            category=case.category,
+            question=case.question,
+            known_issue=case.known_issue,
+            rewritten_query=rag_answer.rewritten_query,
+            resolved_tickers=rag_answer.resolved_tickers,
+            answer=rag_answer.answer,
         )
+        results.append(result)
+        if on_result is not None:
+            on_result(result)
     return results
 
 

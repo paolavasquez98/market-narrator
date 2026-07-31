@@ -49,6 +49,13 @@ class Settings(BaseSettings):
         "postgresql://finrag:finrag@localhost:5432/finrag"
     )
 
+    # --- API / UI -------------------------------------------------------------
+    # Where the Streamlit UI (ui/app.py) finds the FastAPI service. Defaults
+    # to localhost for running both processes directly on the host; overridden
+    # to "http://api:8000" in docker-compose.yml, where "api" is the service's
+    # DNS name on the compose network rather than a routable host port.
+    api_base_url: str = "http://localhost:8000"
+
     @property
     def raw_data_dir(self) -> Path:
         return self.data_dir / "raw"

@@ -1,0 +1,21 @@
+# Auto-provisions the Postgres datasource on Grafana startup -- no manual
+# "Add data source" click-through needed after `docker compose up`. Points
+# at the same `db` service/database query_logs (schema.sql) writes to.
+apiVersion: 1
+
+datasources:
+  - name: Market Narrator Postgres
+    uid: market-narrator-postgres
+    type: postgres
+    access: proxy
+    url: db:5432
+    database: finrag
+    user: finrag
+    isDefault: true
+    editable: false
+    jsonData:
+      sslmode: disable
+      postgresVersion: 1600
+      timescaledb: false
+    secureJsonData:
+      password: finrag

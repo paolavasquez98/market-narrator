@@ -20,6 +20,8 @@ from finrag.eval.llm_eval import (
     EVAL_QUESTIONS,
     LLMEvalRow,
     _judge_without_position_bias,
+    evaluate_tool_calling_impact,
+    filter_pending_questions,
     generate_with_tools,
     generate_without_tools,
     results_to_dataframe,
@@ -137,3 +139,85 @@ def test_summarize_by_category_averages_per_category():
     narrative_row = summary[summary["category"] == "narrative"].iloc[0]
     assert narrative_row["with_tools_score"] == 4.0
     assert narrative_row["without_tools_score"] == 4.0
+
+
+# --- Day 6: resumability ---
+# eval/evaluate_llm.py needs to survive a Groq rate-limit interruption
+# without losing (or re-paying for) completed work. These tests cover the
+# two pieces that make that possible: filtering out already-scored
+# questions before a run starts, and evaluate_tool_calling_impact
+# reporting each row as soon as it's ready via `on_row` rather than only
+# once the whole batch finishes.
+
+
+def test_filter_pending_questions_drops_already_done():
+    questions = [
+        {"question": "q1", "category": "numeric"},
+        {"question": "q2", "category": "narrative"},
+        {"question": "q3", "category": "numeric"},
+    ]
+    pending = filter_pending_questions(questions, already_done={"q1", "q3"})
+    assert pending == [{"question": "q2", "category": "narrative"}]
+
+
+def test_filter_pending_questions_returns_everything_when_nothing_done():
+    questions = [{"question": "q1", "category": "numeric"}]
+    assert filter_pending_questions(questions, already_done=set()) == questions
+
+
+def _wire_fake_pipeline(monkeypatch, judge_return=None):
+    """Monkeypatch every dependency evaluate_tool_calling_impact calls, so
+    it can run end-to-end against a fake question list with no real DB,
+    embedder, reranker, or LLM.
+    """
+    monkeypatch.setattr(llm_eval_module, "retrieve_for_question", lambda *a, **k: [_result()])
+    monkeypatch.setattr(llm_eval_module, "build_context", lambda retrieved: "ctx")
+    monkeypatch.setattr(
+        llm_eval_module, "generate_with_tools", lambda llm, q, retrieved: f"with:{q}"
+    )
+    monkeypatch.setattr(
+        llm_eval_module, "generate_without_tools", lambda llm, q, retrieved: f"without:{q}"
+    )
+    verdict = judge_return or JudgeVerdict(answer_a_score=5, answer_b_score=1, reasoning="r")
+    monkeypatch.setattr(llm_eval_module, "judge_answers", lambda *a, **k: verdict)
+
+
+def test_evaluate_tool_calling_impact_calls_on_row_for_each_completed_question(monkeypatch):
+    _wire_fake_pipeline(monkeypatch)
+    questions = [
+        {"question": "q1", "category": "numeric"},
+        {"question": "q2", "category": "narrative"},
+    ]
+    seen: list[LLMEvalRow] = []
+
+    rows = evaluate_tool_calling_impact(
+        conn=None, llm=MagicMock(), embedder=MagicMock(), reranker=MagicMock(),
+        questions=questions, on_row=seen.append,
+    )
+
+    assert [r.question for r in seen] == ["q1", "q2"]
+    assert seen == rows
+
+
+def test_evaluate_tool_calling_impact_position_bias_is_stable_regardless_of_batch_position(monkeypatch):
+    """The whole point of seeding the swap decision per-question (not
+    sequentially from one shared Random) is that resuming a partial run
+    reproduces the same A/B assignment a single uninterrupted run would
+    have made. Verify that directly: score a question alone vs. score it
+    as the second of two questions, and confirm the result is identical.
+    """
+    _wire_fake_pipeline(monkeypatch)
+    target = {"question": "How did AAPL do in 2022?", "category": "narrative"}
+    other = {"question": "What was NVDA's return in 2021?", "category": "numeric"}
+
+    [alone_row] = evaluate_tool_calling_impact(
+        conn=None, llm=MagicMock(), embedder=MagicMock(), reranker=MagicMock(), questions=[target]
+    )
+    batch_rows = evaluate_tool_calling_impact(
+        conn=None, llm=MagicMock(), embedder=MagicMock(), reranker=MagicMock(),
+        questions=[other, target],
+    )
+    batch_row = next(r for r in batch_rows if r.question == target["question"])
+
+    assert alone_row.with_tools_score == batch_row.with_tools_score
+    assert alone_row.without_tools_score == batch_row.without_tools_score

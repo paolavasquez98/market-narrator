@@ -32,10 +32,85 @@ services:
     depends_on:
       db:
         condition: service_healthy
-        
-  # api, ui, and grafana services are added in later milestones
-  # (see docs/PROJECT_PLAN.md, Days 6-7) once there's an app to run.
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: finrag-api
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Overrides the .env value (which points at localhost, correct for
+      # running the API directly on the host) -- inside the compose
+      # network, Postgres is reachable at the service name "db", not
+      # localhost. `environment:` takes precedence over `env_file:` in
+      # compose, which is what makes this override work.
+      DATABASE_URL: postgresql://finrag:finrag@db:5432/finrag
+      FASTEMBED_CACHE_PATH: /app/.cache/fastembed
+    ports:
+      - "8000:8000"
+    volumes:
+      # The ingested price cache (fetch_prices.py's Parquet files) -- the
+      # agent tools (agent/tools.py) read this directly, not just
+      # Postgres, so /ask's tool-calling path needs it mounted. Run
+      # `uv run python -m finrag.ingestion.fetch_prices` on the host
+      # first; this is a read-write bind mount only so the container can
+      # also populate the cache if it's empty.
+      - ./data:/app/data
+      # Named volume so the ~100-200MB embedding/reranking ONNX models
+      # (downloaded from Hugging Face on first use) persist across
+      # container restarts instead of re-downloading every time.
+      - fastembed-cache:/app/.cache/fastembed
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://localhost:8000/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+    container_name: finrag-ui
+    restart: unless-stopped
+    environment:
+      # "api" is the service's DNS name on the compose network, not a
+      # routable host port -- see finrag.config.settings.api_base_url's
+      # docstring for the localhost-vs-compose distinction.
+      API_BASE_URL: http://api:8000
+    ports:
+      - "8501:8501"
+    depends_on:
+      - api
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: finrag-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      # Anonymous viewer access -- this is a local/demo deployment with no
+      # sensitive data (query_logs holds questions about public stock
+      # prices, nothing personal), so requiring a login just to view the
+      # dashboard would be friction with no real security benefit here.
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   finrag-db-data:
   pgadmin-data:
+  fastembed-cache:
+  grafana-data:

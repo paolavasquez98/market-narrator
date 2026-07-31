@@ -12,7 +12,13 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 import finrag.eval.failure_cases as fc_module
-from finrag.eval.failure_cases import FailureCase, render_markdown, run_failure_cases
+from finrag.eval.failure_cases import (
+    FailureCase,
+    FailureCaseResult,
+    filter_pending_cases,
+    render_markdown,
+    run_failure_cases,
+)
 from finrag.rag.pipeline import RagAnswer
 
 
@@ -66,3 +72,37 @@ def test_render_markdown_includes_all_case_fields(monkeypatch):
 def test_render_markdown_handles_empty_results():
     transcript = render_markdown([])
     assert transcript.startswith("# Failure case transcript")
+
+
+# --- Day 6: resumability ---
+# eval/run_failure_cases.py needs to survive a Groq rate-limit
+# interruption without losing (or re-paying for) completed cases.
+
+
+def test_filter_pending_cases_drops_already_done():
+    cases = [
+        FailureCase(id="c1", category="cat", question="q1", known_issue="i1"),
+        FailureCase(id="c2", category="cat", question="q2", known_issue="i2"),
+    ]
+    pending = filter_pending_cases(cases, already_done={"c1"})
+    assert [c.id for c in pending] == ["c2"]
+
+
+def test_filter_pending_cases_returns_everything_when_nothing_done():
+    cases = [FailureCase(id="c1", category="cat", question="q1", known_issue="i1")]
+    assert filter_pending_cases(cases, already_done=set()) == cases
+
+
+def test_run_failure_cases_calls_on_result_for_each_completed_case(monkeypatch):
+    monkeypatch.setattr(fc_module, "answer_question", lambda q: _fake_rag_answer(q))
+
+    cases = [
+        FailureCase(id="c1", category="cat", question="q1", known_issue="i1"),
+        FailureCase(id="c2", category="cat", question="q2", known_issue="i2"),
+    ]
+    seen: list[FailureCaseResult] = []
+
+    results = run_failure_cases(cases, on_result=seen.append)
+
+    assert [r.id for r in seen] == ["c1", "c2"]
+    assert seen == results

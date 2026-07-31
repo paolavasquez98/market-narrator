@@ -5,6 +5,17 @@ for the same reason SQL lives in one place in knowledge_base/: prompt
 wording is exactly the kind of thing we'll be iterating on and A/B
 comparing during LLM evaluation (Day 5) -- it should be easy to find and
 easy to swap without touching pipeline control flow.
+
+Day 6: the last two rules below were added directly in response to two of
+the five failure modes formalized in eval/failure_cases.py during manual
+Day 4 testing -- "unsupported-ticker" (the model hallucinating a
+plausible-looking substitute company instead of saying it isn't covered)
+and "tool-call-as-text" (the model emitting a tool-call-shaped string as
+part of its plain-text answer instead of actually invoking the tool).
+Both are prompt-level fixes only, deliberately -- no change to
+agent/orchestrator.py's loop or tool schemas, since those are working
+correctly; the failure was the model not being told what to do in these
+specific situations. See docs/learning/day06_learning.md.
 """
 
 from __future__ import annotations
@@ -29,7 +40,17 @@ Rules:
 - If neither the CONTEXT nor a tool call can answer the question, say so \
   plainly instead of guessing.
 - Be concise and specific. Prefer citing the exact tickers and periods \
-  from the CONTEXT (or a tool result) over vague language.\
+  from the CONTEXT (or a tool result) over vague language.
+- This system only covers a fixed set of tickers. If the CONTEXT is empty \
+  and a tool call fails because a company/ticker isn't recognized, tell \
+  the user plainly that this company isn't covered by this system. Never \
+  substitute a different, similar-sounding company or ticker as if it \
+  answered the question that was actually asked.
+- Tool calls must only happen through the tool-calling mechanism you have \
+  been given -- never write a function name, arguments, or JSON that looks \
+  like a tool call as part of your plain-text answer. If you need a number \
+  a tool would provide, actually call the tool; if you cannot call it, say \
+  you don't have that exact figure rather than describing the call.\
 """
 
 PROMPT_TEMPLATE = """\
