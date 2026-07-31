@@ -1,0 +1,131 @@
+question,doc_id,ticker,granularity,period_start,period_end
+What was the overall percentage change in the stock price of AAPL over the course of the year 2025?,AAPL:yearly:2025-01-02,AAPL,yearly,2025-01-02,2025-12-31
+What was the overall direction of the stock price of AAPL during the month of May 2017?,AAPL:monthly:2017-05-01,AAPL,monthly,2017-05-01,2017-05-31
+What was the overall direction of the stock price of AAPL during the month of July 2015?,AAPL:monthly:2015-07-01,AAPL,monthly,2015-07-01,2015-07-31
+What was the overall percentage change in the stock price of AAPL over the given weekly period?,AAPL:weekly:2020-05-26,AAPL,weekly,2020-05-26,2020-05-29
+"What was the overall direction of the stock's price movement during the week of October 21 to October 25, 2019?",AAPL:weekly:2019-10-21,AAPL,weekly,2019-10-21,2019-10-25
+What was the overall direction of AMD's stock price over the course of 2018?,AMD:yearly:2018-01-02,AMD,yearly,2018-01-02,2018-12-31
+What was the overall direction of AMD's stock price during the last month of 2017?,AMD:monthly:2017-12-01,AMD,monthly,2017-12-01,2017-12-29
+What was the overall direction of AMD's stock price over the course of the month and how did it compare to its highest and lowest points during that time?,AMD:monthly:2017-03-01,AMD,monthly,2017-03-01,2017-03-31
+"What was the overall percentage change in the stock price of AMD over the course of the week of September 15 to September 19, 2025?",AMD:weekly:2025-09-15,AMD,weekly,2025-09-15,2025-09-19
+"What was the overall direction of AMD's stock price during the week of September 19 to September 23, 2016?",AMD:weekly:2016-09-19,AMD,weekly,2016-09-19,2016-09-23
+What was the overall direction of Amazon's stock price over the course of the year 2024?,AMZN:yearly:2024-01-02,AMZN,yearly,2024-01-02,2024-12-31
+What was the overall direction of the stock's price movement during the month and how did it compare to its highest and lowest points?,AMZN:monthly:2024-01-02,AMZN,monthly,2024-01-02,2024-01-31
+What was the overall direction of the stock price of AMZN over the course of the month and how did it compare to its highest and lowest points during that time?,AMZN:monthly:2015-09-01,AMZN,monthly,2015-09-01,2015-09-30
+"What was the overall direction of the stock price of AMZN over the week of August 3 to August 7, 2015?",AMZN:weekly:2015-08-03,AMZN,weekly,2015-08-03,2015-08-07
+What was the overall direction of the stock price of AMZN over the first week of November 2016?,AMZN:weekly:2016-10-31,AMZN,weekly,2016-10-31,2016-11-04
+What was the overall direction of AVGO's stock price over the course of the year 2018?,AVGO:yearly:2018-01-02,AVGO,yearly,2018-01-02,2018-12-31
+What was the overall direction of the stock price of AVGO over the last month of 2019?,AVGO:monthly:2019-12-02,AVGO,monthly,2019-12-02,2019-12-31
+What was the overall direction of the stock price of AVGO over the course of the month and how did it compare to its highest and lowest points during that time?,AVGO:monthly:2025-10-01,AVGO,monthly,2025-10-01,2025-10-31
+What was the overall percentage change in the stock price of AVGO over the course of the week?,AVGO:weekly:2015-07-13,AVGO,weekly,2015-07-13,2015-07-17
+What was the overall percentage change in the stock price of AVGO over the given week?,AVGO:weekly:2026-01-05,AVGO,weekly,2026-01-05,2026-01-09
+What was the overall direction of BAC's stock price over the course of the year and how did it compare to its highest and lowest points during that time?,BAC:yearly:2018-01-02,BAC,yearly,2018-01-02,2018-12-31
+What was the overall direction and percentage change of BAC's stock price over the last month of 2023?,BAC:monthly:2023-12-01,BAC,monthly,2023-12-01,2023-12-29
+What was the overall direction and percentage change of BAC's stock price during the month of September 2019?,BAC:monthly:2019-09-03,BAC,monthly,2019-09-03,2019-09-30
+"What was the overall direction of the stock's price movement during the week of October 23 to 27, 2023?",BAC:weekly:2023-10-23,BAC,weekly,2023-10-23,2023-10-27
+What was the overall percentage change in the stock price of BAC over the course of the week?,BAC:weekly:2020-06-15,BAC,weekly,2020-06-15,2020-06-19
+What was the overall direction of the stock's price movement during the year 2015?,CAT:yearly:2015-01-02,CAT,yearly,2015-01-02,2015-12-31
+What was the overall direction of the stock's price movement during the month and how did it compare to its highest and lowest points?,CAT:monthly:2018-05-01,CAT,monthly,2018-05-01,2018-05-31
+What was the overall direction of the stock's price movement during the month and how did it compare to its highest and lowest points?,CAT:monthly:2024-01-02,CAT,monthly,2024-01-02,2024-01-31
+"What was the overall direction of the stock's price movement during the week of September 7 to September 10, 2021?",CAT:weekly:2021-09-07,CAT,weekly,2021-09-07,2021-09-10
+"What was the overall direction of the stock's price movement during the week of June 15 to June 19, 2020?",CAT:weekly:2020-06-15,CAT,weekly,2020-06-15,2020-06-19
+What was the overall percentage change in the stock's price over the course of the year?,COST:yearly:2017-01-03,COST,yearly,2017-01-03,2017-12-29
+What was the overall percentage change in the stock's price over the course of the month?,COST:monthly:2019-08-01,COST,monthly,2019-08-01,2019-08-30
+What was the overall percentage change in the stock's price over the course of the month?,COST:monthly:2022-03-01,COST,monthly,2022-03-01,2022-03-31
+What was the overall percentage change in the stock's price over the given week?,COST:weekly:2017-01-03,COST,weekly,2017-01-03,2017-01-06
+"What was the overall direction of the stock's price movement during the week of October 24 to 28, 2016?",COST:weekly:2016-10-24,COST,weekly,2016-10-24,2016-10-28
+What was the overall percentage change in the stock price of CVX over the course of the year 2021?,CVX:yearly:2021-01-04,CVX,yearly,2021-01-04,2021-12-31
+What was the overall direction of the stock price of CVX during the month of January 2017?,CVX:monthly:2017-01-03,CVX,monthly,2017-01-03,2017-01-31
+What was the overall direction of the stock price of CVX over the month of August 2022?,CVX:monthly:2022-08-01,CVX,monthly,2022-08-01,2022-08-31
+What was the overall direction of the stock price of CVX over the course of the week and how did it compare to its highest and lowest points during that time?,CVX:weekly:2021-10-04,CVX,weekly,2021-10-04,2021-10-08
+What was the largest single-day percentage increase in the stock price of CVX during the week of 2020-03-09 to 2020-03-13?,CVX:weekly:2020-03-09,CVX,weekly,2020-03-09,2020-03-13
+What was the overall direction of the stock price of GOOGL over the course of the year 2015?,GOOGL:yearly:2015-01-02,GOOGL,yearly,2015-01-02,2015-12-31
+What was the overall direction of the stock price of GOOGL during the month of October 2024?,GOOGL:monthly:2024-10-01,GOOGL,monthly,2024-10-01,2024-10-31
+What was the overall direction of the stock price of GOOGL during the month of June 2026?,GOOGL:monthly:2026-06-01,GOOGL,monthly,2026-06-01,2026-06-30
+What was the overall percentage change in the stock price of GOOGL over the course of the week?,GOOGL:weekly:2017-06-12,GOOGL,weekly,2017-06-12,2017-06-16
+What was the overall direction of the stock price of GOOGL over the course of the week and how significant was the change?,GOOGL:weekly:2022-06-06,GOOGL,weekly,2022-06-06,2022-06-10
+What was the overall percentage change in the stock price of JNJ over the course of the year 2016?,JNJ:yearly:2016-01-04,JNJ,yearly,2016-01-04,2016-12-30
+What was the overall percentage change in the stock price of JNJ over the month of April 2021?,JNJ:monthly:2021-04-01,JNJ,monthly,2021-04-01,2021-04-30
+What was the overall percentage change in the stock price of JNJ over the month of September 2022?,JNJ:monthly:2022-09-01,JNJ,monthly,2022-09-01,2022-09-30
+What was the overall percentage change in the stock price of JNJ over the given week?,JNJ:weekly:2026-05-04,JNJ,weekly,2026-05-04,2026-05-08
+What was the overall direction of the stock price of JNJ over the course of the week and how significant was the change?,JNJ:weekly:2018-10-08,JNJ,weekly,2018-10-08,2018-10-12
+What was the overall percentage change in the stock price of JPM over the first half of the year?,JPM:yearly:2026-01-02,JPM,yearly,2026-01-02,2026-07-23
+What was the overall direction of JPM's stock price during the month and how did it compare to its peak and trough values within that period?,JPM:monthly:2016-06-01,JPM,monthly,2016-06-01,2016-06-30
+What was the overall direction of JPM's stock price during the month of December 2015?,JPM:monthly:2015-12-01,JPM,monthly,2015-12-01,2015-12-31
+What was the overall direction of JPM's stock price over the last week of June 2019?,JPM:weekly:2019-06-24,JPM,weekly,2019-06-24,2019-06-28
+What was the overall percentage change in the stock price of JPM over the course of the week?,JPM:weekly:2020-09-08,JPM,weekly,2020-09-08,2020-09-11
+What was the overall percentage change in the stock price of KO over the course of the year?,KO:yearly:2016-01-04,KO,yearly,2016-01-04,2016-12-30
+What was the overall direction of the stock price of KO during the last month of 2019?,KO:monthly:2019-12-02,KO,monthly,2019-12-02,2019-12-31
+What was the overall percentage change in the stock price of KO over the month of February 2017?,KO:monthly:2017-02-01,KO,monthly,2017-02-01,2017-02-28
+What was the overall direction and percentage change of the stock price of KO over the given week in June 2022?,KO:weekly:2022-06-21,KO,weekly,2022-06-21,2022-06-24
+What was the overall percentage change in the stock price of KO over the course of the week?,KO:weekly:2020-06-15,KO,weekly,2020-06-15,2020-06-19
+What was the overall percentage change in the stock price of LLY over the course of the year 2022?,LLY:yearly:2022-01-03,LLY,yearly,2022-01-03,2022-12-30
+What was the overall direction and percentage change in the stock price of LLY over the course of the month?,LLY:monthly:2022-10-03,LLY,monthly,2022-10-03,2022-10-31
+What was the overall percentage change in the stock price of LLY over the month of June 2018?,LLY:monthly:2018-06-01,LLY,monthly,2018-06-01,2018-06-29
+What was the overall percentage change in the stock price of LLY over the course of the week?,LLY:weekly:2022-04-11,LLY,weekly,2022-04-11,2022-04-14
+"What was the overall direction of the stock's price movement during the week of December 20 to December 23, 2021?",LLY:weekly:2021-12-20,LLY,weekly,2021-12-20,2021-12-23
+What was the overall percentage change in the stock's price over the course of the year?,MA:yearly:2018-01-02,MA,yearly,2018-01-02,2018-12-31
+What was the overall direction of the stock's price movement during the month and how significant was the change?,MA:monthly:2020-09-01,MA,monthly,2020-09-01,2020-09-30
+What was the overall percentage change in the stock's price over the course of the month?,MA:monthly:2016-07-01,MA,monthly,2016-07-01,2016-07-29
+What was the overall percentage change in the stock's price over the course of the week?,MA:weekly:2018-05-14,MA,weekly,2018-05-14,2018-05-18
+What was the overall percentage change in the stock's price over the course of the week?,MA:weekly:2025-06-23,MA,weekly,2025-06-23,2025-06-27
+What was the overall direction of the stock's price movement during the first half of the year?,META:yearly:2026-01-02,META,yearly,2026-01-02,2026-07-23
+What was the overall direction of the stock's price movement during the month and how significant was the change?,META:monthly:2020-03-02,META,monthly,2020-03-02,2020-03-31
+What was the overall percentage change in the stock price of META over the month of June 2018?,META:monthly:2018-06-01,META,monthly,2018-06-01,2018-06-29
+"What was the largest single-day percentage increase in the stock's price during the week of January 29 to February 2, 2024?",META:weekly:2024-01-29,META,weekly,2024-01-29,2024-02-02
+"What was the overall percentage change in the stock price of META over the week of June 13 to June 17, 2022?",META:weekly:2022-06-13,META,weekly,2022-06-13,2022-06-17
+What was the overall direction of MSFT's stock price over the course of 2019?,MSFT:yearly:2019-01-02,MSFT,yearly,2019-01-02,2019-12-31
+What was the overall direction of the stock price and the percentage change during the month of September 2019?,MSFT:monthly:2019-09-03,MSFT,monthly,2019-09-03,2019-09-30
+What was the overall direction of the stock price of MSFT over the course of December 2021?,MSFT:monthly:2021-12-01,MSFT,monthly,2021-12-01,2021-12-31
+What was the overall direction of the stock price of MSFT over the given week and how did it compare to its highest and lowest points during that time?,MSFT:weekly:2016-02-08,MSFT,weekly,2016-02-08,2016-02-12
+What was the overall percentage change in the stock price of MSFT over the given week?,MSFT:weekly:2019-07-01,MSFT,weekly,2019-07-01,2019-07-05
+What was the overall direction of NFLX's stock price over the course of the year 2015?,NFLX:yearly:2015-01-02,NFLX,yearly,2015-01-02,2015-12-31
+What was the overall direction of NFLX's stock price during the month of September 2021?,NFLX:monthly:2021-09-01,NFLX,monthly,2021-09-01,2021-09-30
+What was the overall direction of NFLX's stock price over the course of the month and how did it compare to its highest and lowest points during that time?,NFLX:monthly:2023-07-03,NFLX,monthly,2023-07-03,2023-07-31
+What was the overall direction of the stock price of NFLX over the given week and how did it compare to its highest and lowest points during that time?,NFLX:weekly:2020-04-06,NFLX,weekly,2020-04-06,2020-04-09
+"What was the direction and magnitude of the price change for NFLX over the week of April 18 to April 22, 2016?",NFLX:weekly:2016-04-18,NFLX,weekly,2016-04-18,2016-04-22
+What was the overall direction of NVDA's stock price over the course of 2018?,NVDA:yearly:2018-01-02,NVDA,yearly,2018-01-02,2018-12-31
+What was the overall direction of NVDA's stock price during the month of September 2021?,NVDA:monthly:2021-09-01,NVDA,monthly,2021-09-01,2021-09-30
+What was the overall percentage change in the stock price of NVDA over the month of July 2019?,NVDA:monthly:2019-07-01,NVDA,monthly,2019-07-01,2019-07-31
+"What was the overall percentage change in the stock price of NVDA over the week of October 21 to October 25, 2024?",NVDA:weekly:2024-10-21,NVDA,weekly,2024-10-21,2024-10-25
+What was the overall direction of NVDA's stock price over the week of 2022-10-10 to 2022-10-14?,NVDA:weekly:2022-10-10,NVDA,weekly,2022-10-10,2022-10-14
+What was the overall direction of PEP's stock price over the course of the year 2025?,PEP:yearly:2025-01-02,PEP,yearly,2025-01-02,2025-12-31
+What was the overall percentage change in the stock price of PEP over the course of the month?,PEP:monthly:2024-10-01,PEP,monthly,2024-10-01,2024-10-31
+What was the overall percentage change in the stock price of PEP over the given month?,PEP:monthly:2018-01-02,PEP,monthly,2018-01-02,2018-01-31
+"What was the largest single-day percentage decrease in the stock's price during the week of March 16 to March 20, 2020?",PEP:weekly:2020-03-16,PEP,weekly,2020-03-16,2020-03-20
+What was the overall percentage change in the stock price of PEP over the course of the week?,PEP:weekly:2017-09-25,PEP,weekly,2017-09-25,2017-09-29
+What was the overall percentage change in the stock price of PFE over the course of the year 2018?,PFE:yearly:2018-01-02,PFE,yearly,2018-01-02,2018-12-31
+What was the overall direction of the stock's price movement during the month and how significant was the change?,PFE:monthly:2026-06-01,PFE,monthly,2026-06-01,2026-06-30
+What was the overall percentage change in the stock price of PFE over the given month?,PFE:monthly:2020-08-03,PFE,monthly,2020-08-03,2020-08-31
+What was the overall direction of the stock's price movement during the week of 2026-06-22 to 2026-06-26?,PFE:weekly:2026-06-22,PFE,weekly,2026-06-22,2026-06-26
+What was the overall direction and percentage change of PFE's stock price over the given weekly period?,PFE:weekly:2023-05-30,PFE,weekly,2023-05-30,2023-06-02
+What was the overall percentage change in the QQQ ETF's price over the course of the year?,QQQ:yearly:2024-01-02,QQQ,yearly,2024-01-02,2024-12-31
+What was the overall direction of the QQQ ETF's price movement during the month of July 2023?,QQQ:monthly:2023-07-03,QQQ,monthly,2023-07-03,2023-07-31
+What was the overall direction of the QQQ ETF's price movement during the month of September 2022?,QQQ:monthly:2022-09-01,QQQ,monthly,2022-09-01,2022-09-30
+"What was the overall percentage change in the QQQ ETF's price over the week of April 22 to April 26, 2019?",QQQ:weekly:2019-04-22,QQQ,weekly,2019-04-22,2019-04-26
+"What was the overall direction of the QQQ ETF's price movement during the week of September 18 to September 22, 2017?",QQQ:weekly:2017-09-18,QQQ,weekly,2017-09-18,2017-09-22
+What was the overall percentage change in the SPY ETF's price over the course of the year?,SPY:yearly:2023-01-03,SPY,yearly,2023-01-03,2023-12-29
+What was the overall direction and percentage change of the SPY ETF's price over the month of July 2025?,SPY:monthly:2025-07-01,SPY,monthly,2025-07-01,2025-07-31
+What was the overall percentage change in the SPY ETF's price over the course of December 2016?,SPY:monthly:2016-12-01,SPY,monthly,2016-12-01,2016-12-30
+"What was the overall direction of the SPY ETF's price movement during the week of December 7 to December 11, 2015?",SPY:weekly:2015-12-07,SPY,weekly,2015-12-07,2015-12-11
+What was the overall direction of the SPY ETF's price movement over the past week and did it experience any large daily swings?,SPY:weekly:2017-02-27,SPY,weekly,2017-02-27,2017-03-03
+What was the overall percentage change in the stock price of TSLA over the course of the year?,TSLA:yearly:2017-01-03,TSLA,yearly,2017-01-03,2017-12-29
+What was the overall direction of TSLA's stock price during the month of May 2018?,TSLA:monthly:2018-05-01,TSLA,monthly,2018-05-01,2018-05-31
+What was the overall direction of TSLA's stock price during the first month of 2024 and how significant was the change?,TSLA:monthly:2024-01-02,TSLA,monthly,2024-01-02,2024-01-31
+"What was the overall percentage change in the stock price of TSLA over the week of April 4 to April 8, 2016?",TSLA:weekly:2016-04-04,TSLA,weekly,2016-04-04,2016-04-08
+"What was the overall direction and percentage change of TSLA's stock price over the week of July 25 to July 29, 2022?",TSLA:weekly:2022-07-25,TSLA,weekly,2022-07-25,2022-07-29
+What was the overall percentage change in the stock price of TSM over the course of the year 2021?,TSM:yearly:2021-01-04,TSM,yearly,2021-01-04,2021-12-31
+What was the overall direction and percentage change of TSM's stock price over the last month of 2024?,TSM:monthly:2024-12-02,TSM,monthly,2024-12-02,2024-12-31
+What was the overall direction of the stock's price movement during the month and how significant was the change?,TSM:monthly:2026-04-01,TSM,monthly,2026-04-01,2026-04-30
+What was the overall direction and percentage change of TSM's stock price over the course of the given week?,TSM:weekly:2019-12-09,TSM,weekly,2019-12-09,2019-12-13
+What was the overall percentage change in the stock price of TSM over the course of the week?,TSM:weekly:2025-11-10,TSM,weekly,2025-11-10,2025-11-14
+What was the overall percentage change in the stock's price over the course of the year?,V:yearly:2015-01-02,V,yearly,2015-01-02,2015-12-31
+What was the overall percentage change in the stock's price during the month of June 2017?,V:monthly:2017-06-01,V,monthly,2017-06-01,2017-06-30
+What was the overall percentage change in the stock's price over the course of the month?,V:monthly:2026-06-01,V,monthly,2026-06-01,2026-06-30
+"What was the overall direction of the stock's price movement during the week of March 30 to April 3, 2020?",V:weekly:2020-03-30,V,weekly,2020-03-30,2020-04-03
+"What was the overall percentage change in the stock's price over the four-day period from September 7 to September 10, 2021?",V:weekly:2021-09-07,V,weekly,2021-09-07,2021-09-10
+What was the overall percentage change in the stock price of XOM over the course of the year 2016?,XOM:yearly:2016-01-04,XOM,yearly,2016-01-04,2016-12-30
+What was the overall direction of XOM's stock price during the month of April 2021?,XOM:monthly:2021-04-01,XOM,monthly,2021-04-01,2021-04-30
+What was the overall percentage change in the stock price of XOM over the month of April 2024?,XOM:monthly:2024-04-01,XOM,monthly,2024-04-01,2024-04-30
+What was the overall direction of the stock price of XOM over the given week and how did it compare to its highest and lowest points during that time?,XOM:weekly:2018-02-05,XOM,weekly,2018-02-05,2018-02-09
+What was the overall direction of XOM's stock price over the last week of November 2023?,XOM:weekly:2023-11-27,XOM,weekly,2023-11-27,2023-12-01
