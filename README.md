@@ -103,7 +103,6 @@ uv run python eval/evaluate_llm.py            # LLM-as-judge: with-tools vs. wit
 uv run python eval/run_failure_cases.py       # known-tricky-question regression transcript (resumable)
 ```
 
-(`make eval-ground-truth`, `make eval-retrieval`, `make eval-llm`, `make eval-failures`.) See `docs/learning/day05_learning.md` and `day06_learning.md` for the methodology and findings.
 
 ### Tests and linting
 
