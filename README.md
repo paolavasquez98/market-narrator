@@ -118,7 +118,6 @@ Built for the [DataTalks.Club LLM Zoomcamp](https://github.com/DataTalksClub/llm
 
 ## Documentation
 
-- [`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md) — original plan, tech choices, roadmap, evaluation-criteria mapping, and (section 9) how execution actually diverged from the plan
 - [`docs/architecture.md`](docs/architecture.md) — the as-built system: request flow, data flow, deployment topology
 - [`docs/ticker_universe.md`](docs/ticker_universe.md) — the fixed ticker universe
 - [`docs/deployment.md`](docs/deployment.md) — running the full docker-compose stack, environment variables, cloud deployment notes
