@@ -31,7 +31,6 @@ eval/results/*_progress.json
 
 # Private, teaching-oriented learning notes
 docs/learning/
-docs/architecture.md
 docs/submission_checklist.md
 docs/design_decisions.md
 docs/future_work.md
