@@ -11,6 +11,20 @@ Raw daily price data isn't itself a knowledge base — it's a table of numbers. 
 
 A query-rewriting step extracts structured parameters (ticker, date range) from natural-language questions, feeding both retrieval and the tools. See [`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md) for the full architecture and the reasoning behind these choices.
 
+## Screenshots
+
+**Streamlit UI** — ask a question, tune how many chunks get retrieved:
+
+![Streamlit UI](docs/images/streamlit_ui.png)
+
+**Grafana monitoring dashboard** — query volume, latency, feedback, tool-calling usage, and most-asked-about tickers:
+
+![Grafana dashboard](docs/images/grafana_dashboard.png)
+
+Recent queries, with the retrieval method and latency logged per request:
+
+![Grafana recent queries table](docs/images/grafana_recent_queries.png)
+
 ## Ticker universe
 
 A fixed set of 26 liquid tickers across 8 sectors — see [`docs/ticker_universe.md`](docs/ticker_universe.md) for the full list and the reasoning for keeping it bounded.
