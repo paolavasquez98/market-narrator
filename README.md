@@ -2,8 +2,6 @@
 
 An agentic RAG application for exploring historical stock market behavior. Ask questions like *"How did Apple perform in 2022?"* or *"Compare Microsoft and Nvidia over the last five years"* and get answers grounded in real historical price data, not the LLM's memory.
 
-> Built for the [DataTalks.Club LLM Zoomcamp](https://github.com/DataTalksClub/llm-zoomcamp) capstone project. The full stack (ingestion, retrieval, agent, API, UI, monitoring) runs end-to-end via `docker compose up`. The one thing still pending at submission time is re-running the LLM-as-judge and failure-case evaluation scripts after a Groq daily token quota reset — both resume automatically from where they stopped, nothing is re-done. See [`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md) section 9 for the full status.
-
 ## What this is
 
 Raw daily price data isn't itself a knowledge base — it's a table of numbers. This project turns [`yfinance`](https://github.com/ranaroussi/yfinance) historical price data into a retrievable knowledge base two ways:
@@ -102,7 +100,7 @@ uv run ruff check src tests eval ui    # make lint
 
 ## Evaluation criteria
 
-Built for the [DataTalks.Club LLM Zoomcamp](https://github.com/DataTalksClub/llm-zoomcamp) capstone rubric ([`project.md`](https://github.com/DataTalksClub/llm-zoomcamp/blob/main/project.md)). Full detail and evidence for each row: [`docs/submission_checklist.md`](docs/submission_checklist.md).
+Built for the [DataTalks.Club LLM Zoomcamp](https://github.com/DataTalksClub/llm-zoomcamp) capstone rubric ([`project.md`](https://github.com/DataTalksClub/llm-zoomcamp/blob/main/project.md)). 
 
 | Criterion | Where |
 |---|---|
@@ -120,11 +118,8 @@ Built for the [DataTalks.Club LLM Zoomcamp](https://github.com/DataTalksClub/llm
 
 ## Documentation
 
-- [`docs/submission_checklist.md`](docs/submission_checklist.md) — criterion-by-criterion status and what's still open before submitting
 - [`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md) — original plan, tech choices, roadmap, evaluation-criteria mapping, and (section 9) how execution actually diverged from the plan
 - [`docs/architecture.md`](docs/architecture.md) — the as-built system: request flow, data flow, deployment topology
-- [`docs/design_decisions.md`](docs/design_decisions.md) — key decisions and trade-offs, with the reasoning behind each
-- [`docs/future_work.md`](docs/future_work.md) — known limitations and what's next, stated honestly rather than left implicit
 - [`docs/ticker_universe.md`](docs/ticker_universe.md) — the fixed ticker universe
 - [`docs/deployment.md`](docs/deployment.md) — running the full docker-compose stack, environment variables, cloud deployment notes
 
