@@ -24,11 +24,16 @@ data/processed/
 # OS cruft
 .DS_Store
 
-# Eval outputs are versioned on purpose (evidence for the evaluation writeup)
+# Eval outputs are versioned on purpose
+eval/results/*_progress.csv
+eval/results/*_progress.json
 !eval/results/.gitkeep
 
-# Private, teaching-oriented learning notes (see docs/learning/*_learning.md) --
-# not docs/ as a whole, which also holds public docs (PROJECT_PLAN.md,
-# ticker_universe.md, deployment.md) that need to be tracked and visible
-# to anyone reviewing this repo.
+# Private, teaching-oriented learning notes
 docs/learning/
+docs/architecture.md
+docs/submission_checklist.md
+docs/design_decisions.md
+docs/future_work.md
+docs/deployment.md
+docs/PROJECT_PLAN.md

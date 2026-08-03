@@ -1,0 +1,80 @@
+# Render.com Blueprint -- a starting point for a cloud deployment, not a
+# tested one. Nothing in this repo has been deployed to Render or any
+# other cloud provider from this development environment (no account
+# credentials were available to do so, and a live deploy wasn't judged
+# worth the risk to the project's verified-working local state this late
+# in the timeline -- see docs/deployment.md's "Cloud deployment" section).
+#
+# Review before using: confirm field names against Render's current
+# Blueprint spec (https://render.com/docs/blueprint-spec), fill in
+# GROQ_API_KEY in the Render dashboard (never commit it), and read the
+# "Known gap" note below about the price-cache volume before relying on
+# this for anything real.
+#
+# Usage: connect this repo in the Render dashboard and it will offer to
+# create the resources below ("New +" -> "Blueprint").
+
+databases:
+  - name: market-narrator-db
+    databaseName: finrag
+    user: finrag
+    plan: free
+    postgresMajorVersion: "16"
+    # After the database is created, connect to it (Render's dashboard
+    # provides a psql command) and run:
+    #   CREATE EXTENSION IF NOT EXISTS vector;
+    #   \i src/finrag/knowledge_base/schema.sql
+    # Render Postgres supports pgvector (confirmed via Render's docs as
+    # of this writing) but doesn't run an init-script-on-creation hook
+    # the way docker-compose.yml's local `db` service does -- this is a
+    # manual one-time step for a cloud deploy.
+
+services:
+  - type: web
+    name: market-narrator-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile.api
+    dockerContext: .
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: market-narrator-db
+          property: connectionString
+      - key: LLM_PROVIDER
+        value: groq
+      - key: LLM_MODEL
+        value: llama-3.3-70b-versatile
+      - key: GROQ_API_KEY
+        sync: false # set manually in the Render dashboard, never committed
+      - key: FASTEMBED_CACHE_PATH
+        value: /app/.cache/fastembed
+
+  - type: web
+    name: market-narrator-ui
+    runtime: docker
+    dockerfilePath: ./Dockerfile.ui
+    dockerContext: .
+    plan: starter
+    envVars:
+      # Render assigns each web service a public https://<name>.onrender.com
+      # URL. Fill this in with the API service's actual URL after both
+      # services are created once -- `fromService`/`property: host`-style
+      # cross-service references exist in Render's Blueprint spec but were
+      # not verified here; setting it explicitly is the safer starting point.
+      - key: API_BASE_URL
+        value: https://market-narrator-api.onrender.com
+
+# Known gap this Blueprint does NOT solve: agent/tools.py reads
+# data/raw/*.parquet directly from disk (see Dockerfile.api's comments
+# and docs/deployment.md). docker-compose.yml solves this locally with a
+# bind-mounted volume; Render has no equivalent for a host directory that
+# doesn't exist in the cloud. The correct fix for a real Render deploy is
+# to bake the price cache into the image at build time instead -- add
+#   COPY data/raw ./data/raw
+# to Dockerfile.api (after running fetch_prices.py locally so the cache
+# exists to copy), rebaking the image whenever the price data should
+# refresh. Not made the default in Dockerfile.api because it would bloat
+# and slow down every local build for a concern that only applies to this
+# specific cloud path.

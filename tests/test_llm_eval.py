@@ -19,6 +19,7 @@ import finrag.eval.llm_eval as llm_eval_module
 from finrag.eval.llm_eval import (
     EVAL_QUESTIONS,
     LLMEvalRow,
+    _format_tool_trace,
     _judge_without_position_bias,
     evaluate_tool_calling_impact,
     filter_pending_questions,
@@ -54,6 +55,37 @@ def test_generate_with_tools_calls_run_agent_loop(monkeypatch):
     fake_run_agent_loop.assert_called_once()
 
 
+# Day 9: generate_with_tools forwards an optional tool_trace list straight
+# through to run_agent_loop, so evaluate_tool_calling_impact can capture
+# what the agent actually called and show it to the judge.
+def test_generate_with_tools_forwards_tool_trace_to_run_agent_loop(monkeypatch):
+    fake_run_agent_loop = MagicMock(return_value="tool-backed answer")
+    monkeypatch.setattr(llm_eval_module, "run_agent_loop", fake_run_agent_loop)
+    trace: list[dict] = []
+
+    generate_with_tools(MagicMock(), "How did AAPL do?", [_result()], tool_trace=trace)
+
+    assert fake_run_agent_loop.call_args.kwargs["tool_trace"] is trace
+
+
+def test_format_tool_trace_renders_one_line_per_call():
+    trace = [
+        {
+            "name": "get_return",
+            "arguments": {"ticker": "AAPL", "start_date": "2022-01-01", "end_date": "2022-12-31"},
+            "result": {"return_pct": 5.0},
+        }
+    ]
+    formatted = _format_tool_trace(trace)
+    assert formatted == (
+        "get_return(ticker=AAPL, start_date=2022-01-01, end_date=2022-12-31) -> {'return_pct': 5.0}"
+    )
+
+
+def test_format_tool_trace_returns_empty_string_for_no_calls():
+    assert _format_tool_trace([]) == ""
+
+
 def test_generate_without_tools_calls_bare_complete_with_no_tools(monkeypatch):
     fake_llm = MagicMock()
     fake_llm.complete.return_value = MagicMock(content="context-only answer")
@@ -85,7 +117,9 @@ def test_judge_without_position_bias_maps_scores_back_when_not_swapped(monkeypat
     assert without_tools_score == 2
     assert reasoning == "r"
     # Answer A should have been the with-tools answer in the no-swap case.
-    fake_judge.assert_called_once_with(fake_llm, "q", "ctx", "with-tools-answer", "without-tools-answer")
+    fake_judge.assert_called_once_with(
+        fake_llm, "q", "ctx", "with-tools-answer", "without-tools-answer", tool_results=""
+    )
 
 
 def test_judge_without_position_bias_maps_scores_back_when_swapped(monkeypatch):
@@ -172,9 +206,13 @@ def _wire_fake_pipeline(monkeypatch, judge_return=None):
     """
     monkeypatch.setattr(llm_eval_module, "retrieve_for_question", lambda *a, **k: [_result()])
     monkeypatch.setattr(llm_eval_module, "build_context", lambda retrieved: "ctx")
-    monkeypatch.setattr(
-        llm_eval_module, "generate_with_tools", lambda llm, q, retrieved: f"with:{q}"
-    )
+
+    def _fake_generate_with_tools(llm, q, retrieved, tool_trace=None):
+        if tool_trace is not None:
+            tool_trace.append({"name": "get_return", "arguments": {"ticker": "AAPL"}, "result": {}})
+        return f"with:{q}"
+
+    monkeypatch.setattr(llm_eval_module, "generate_with_tools", _fake_generate_with_tools)
     monkeypatch.setattr(
         llm_eval_module, "generate_without_tools", lambda llm, q, retrieved: f"without:{q}"
     )
@@ -197,6 +235,29 @@ def test_evaluate_tool_calling_impact_calls_on_row_for_each_completed_question(m
 
     assert [r.question for r in seen] == ["q1", "q2"]
     assert seen == rows
+
+
+def test_evaluate_tool_calling_impact_passes_captured_tool_trace_to_judge(monkeypatch):
+    """End-to-end wiring check for the Day 9 fix: whatever tool calls
+    generate_with_tools reports via tool_trace should reach judge_answers
+    as a formatted tool_results string -- not just be captured and
+    discarded.
+    """
+    _wire_fake_pipeline(monkeypatch)
+    captured_kwargs = {}
+
+    def _capturing_judge(*args, **kwargs):
+        captured_kwargs.update(kwargs)
+        return JudgeVerdict(answer_a_score=5, answer_b_score=1, reasoning="r")
+
+    monkeypatch.setattr(llm_eval_module, "judge_answers", _capturing_judge)
+
+    evaluate_tool_calling_impact(
+        conn=None, llm=MagicMock(), embedder=MagicMock(), reranker=MagicMock(),
+        questions=[{"question": "q1", "category": "numeric"}],
+    )
+
+    assert "get_return(ticker=AAPL)" in captured_kwargs["tool_results"]
 
 
 def test_evaluate_tool_calling_impact_position_bias_is_stable_regardless_of_batch_position(monkeypatch):

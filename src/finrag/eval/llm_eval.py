@@ -99,13 +99,42 @@ def retrieve_for_question(
     return reranker.rerank(intent.rewritten_query, candidates, top_k=TOP_K)
 
 
-def generate_with_tools(llm: LLMClient, question: str, retrieved: list[SearchResult]) -> str:
+def generate_with_tools(
+    llm: LLMClient,
+    question: str,
+    retrieved: list[SearchResult],
+    tool_trace: list[dict] | None = None,
+) -> str:
+    """`tool_trace`: optional, forwarded to run_agent_loop -- pass a list
+    to capture what tools (if any) the agent actually called, so
+    evaluate_tool_calling_impact can show it to the judge. See llm_judge's
+    module docstring for why this matters.
+    """
     prompt = build_prompt(question, retrieved)
     messages = [
         {"role": "system", "content": SYSTEM_INSTRUCTIONS},
         {"role": "user", "content": prompt},
     ]
-    return run_agent_loop(llm, messages)
+    return run_agent_loop(llm, messages, tool_trace=tool_trace)
+
+
+def _format_tool_trace(tool_trace: list[dict]) -> str:
+    """Render a captured tool_trace (see run_agent_loop) as a short text
+    block for the judge, one call per line, e.g.:
+
+        get_return(ticker=AAPL, start_date=2022-01-03, end_date=2022-06-30) -> {'return_pct': 12.3}
+
+    Empty string when no tools were called (the common case for
+    narrative questions) -- judge_answers treats "" as "omit the section
+    entirely" rather than showing an empty one.
+    """
+    if not tool_trace:
+        return ""
+    lines = []
+    for call in tool_trace:
+        args = ", ".join(f"{k}={v}" for k, v in call["arguments"].items())
+        lines.append(f"{call['name']}({args}) -> {call['result']}")
+    return "\n".join(lines)
 
 
 def generate_without_tools(llm: LLMClient, question: str, retrieved: list[SearchResult]) -> str:
@@ -125,18 +154,23 @@ def _judge_without_position_bias(
     with_tools_answer: str,
     without_tools_answer: str,
     rng: random.Random,
+    tool_results: str = "",
 ) -> tuple[int, int, str] | None:
     """Randomly swap which answer is shown as "A" vs "B" before judging,
     then map the scores back -- an LLM judge can favor whichever position
     it sees first/second regardless of content (a documented judge
     artifact), and always putting the same variant in the same slot would
     let that bias masquerade as a real quality difference.
+
+    `tool_results`: optional, passed straight through to judge_answers --
+    shown to the judge regardless of the A/B swap (like `context` already
+    is), so it doesn't leak which slot is the with-tools answer.
     """
     swap = rng.random() < 0.5
     answer_a = without_tools_answer if swap else with_tools_answer
     answer_b = with_tools_answer if swap else without_tools_answer
 
-    verdict = judge_answers(llm, question, context, answer_a, answer_b)
+    verdict = judge_answers(llm, question, context, answer_a, answer_b, tool_results=tool_results)
     if verdict is None:
         return None
 
@@ -181,7 +215,8 @@ def evaluate_tool_calling_impact(
         retrieved = retrieve_for_question(conn, llm, embedder, reranker, question)
         context = build_context(retrieved)
 
-        with_tools_answer = generate_with_tools(llm, question, retrieved)
+        tool_trace: list[dict] = []
+        with_tools_answer = generate_with_tools(llm, question, retrieved, tool_trace=tool_trace)
         without_tools_answer = generate_without_tools(llm, question, retrieved)
 
         # Seeded per-question (not drawn sequentially from one shared
@@ -190,7 +225,13 @@ def evaluate_tool_calling_impact(
         # the POSITION_SEED comment above.
         rng = random.Random(f"{POSITION_SEED}:{question}")
         judged = _judge_without_position_bias(
-            llm, question, context, with_tools_answer, without_tools_answer, rng
+            llm,
+            question,
+            context,
+            with_tools_answer,
+            without_tools_answer,
+            rng,
+            tool_results=_format_tool_trace(tool_trace),
         )
         if judged is None:
             logger.warning("Skipping %r: judge failed to produce a usable verdict", question)

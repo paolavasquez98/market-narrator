@@ -130,11 +130,22 @@ def _execute_tool(name: str, arguments: dict) -> dict:
         return {"error": f"Invalid arguments for {name}: {exc}"}
 
 
-def run_agent_loop(llm: LLMClient, messages: list[Message]) -> str:
+def run_agent_loop(
+    llm: LLMClient, messages: list[Message], tool_trace: list[dict] | None = None
+) -> str:
     """Run up to MAX_TOOL_ROUNDS of tool calling, then return the final
     text answer. `messages` should already contain the system instructions
     and the user turn (with retrieved context) -- this function only
     appends tool-call/tool-result turns on top of what's passed in.
+
+    `tool_trace`: optional, defaults to None -- every production call site
+    (rag/pipeline.py) omits it and behavior is unchanged. When a caller
+    passes a list, each executed tool call's name/arguments/result is
+    appended to it, so the caller can inspect what the agent actually did
+    after the fact. Added for eval/llm_eval.py, whose LLM judge previously
+    had no way to see tool results and, per the Day 9 investigation
+    (docs/learning/day09_learning.md), was penalizing correct tool-computed
+    answers for not matching the static retrieved CONTEXT.
     """
     conversation = list(messages)
 
@@ -171,6 +182,10 @@ def run_agent_loop(llm: LLMClient, messages: list[Message]) -> str:
 
         for tool_call in response.tool_calls:
             result = _execute_tool(tool_call.name, tool_call.arguments)
+            if tool_trace is not None:
+                tool_trace.append(
+                    {"name": tool_call.name, "arguments": tool_call.arguments, "result": result}
+                )
             conversation.append(
                 {
                     "role": "tool",

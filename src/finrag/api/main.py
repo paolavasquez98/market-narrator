@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 
 from finrag.api.routes import router
 
@@ -37,3 +38,12 @@ app.add_middleware(
 )
 
 app.include_router(router)
+
+
+@app.get("/", include_in_schema=False)
+def root() -> RedirectResponse:
+    """Bare `/` has no meaning of its own -- send a human landing here
+    (or curl-ing the root out of habit) to the interactive API docs
+    instead of a bare 404.
+    """
+    return RedirectResponse(url="/docs")

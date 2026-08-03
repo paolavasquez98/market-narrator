@@ -47,3 +47,20 @@ jobs:
 
       - name: Test
         run: uv run pytest
+
+  docker-build:
+    runs-on: ubuntu-latest
+    # Separate job from lint-and-test: this only proves the images build,
+    # not that the app works end-to-end (that needs GROQ_API_KEY and a
+    # running stack, which CI doesn't have) -- but a build-only check
+    # would have caught the missing-README.md Dockerfile issue found
+    # during Day 7/8 development before it needed a local `docker build`
+    # to discover, and costs nothing when it stays green.
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build API image
+        run: docker build -f Dockerfile.api -t market-narrator-api:ci .
+
+      - name: Build UI image
+        run: docker build -f Dockerfile.ui -t market-narrator-ui:ci .

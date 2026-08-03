@@ -1,0 +1,28 @@
+# Keeps the Docker build context small and build cache stable. Without
+# this, `docker build`'s context upload includes .venv/ (can be
+# hundreds of MB), the full .git history, and the ingested price cache --
+# none of which either Dockerfile actually COPYs, but Docker still has to
+# read and hash them on every build to know that.
+
+.venv/
+.git/
+.github/
+
+__pycache__/
+*.py[oc]
+.pytest_cache/
+.ruff_cache/
+*.egg-info
+
+# Price cache: intentionally NOT baked into the image (see Dockerfile.api's
+# comments and docs/deployment.md) -- mounted as a volume at runtime instead.
+data/
+
+# Secrets: never send to the Docker daemon or bake into a layer.
+.env
+
+# Not needed by either image at runtime.
+docs/
+tests/
+eval/
+.DS_Store

@@ -23,6 +23,12 @@ from finrag.rag.pipeline import RagAnswer
 client = TestClient(app)
 
 
+def test_root_redirects_to_docs():
+    response = client.get("/", follow_redirects=False)
+    assert response.status_code in (302, 307)
+    assert response.headers["location"] == "/docs"
+
+
 def _fake_rag_answer(question: str, top_k: int = 5) -> RagAnswer:
     return RagAnswer(
         question=question,

@@ -96,6 +96,49 @@ def test_tool_error_is_reported_back_to_the_model_not_raised(monkeypatch):
     assert json.loads(tool_result_message["content"]) == {"error": "bad ticker"}
 
 
+# Day 9: eval/llm_eval.py needs to see what tools the agent actually
+# called, to show the LLM judge real computed values instead of asking it
+# to trust an unverifiable number (see docs/learning/day09_learning.md).
+# `tool_trace` is opt-in via a list argument; every other test in this
+# file omits it and exercises the (unchanged) default behavior.
+def test_tool_trace_captures_name_arguments_and_result_when_provided(monkeypatch):
+    fake_result = {"ticker": "AAPL", "return_pct": 5.0}
+    monkeypatch.setitem(orch._TOOL_FUNCTIONS, "get_return", lambda **kwargs: fake_result)
+
+    tool_call = ToolCall(
+        id="call_1",
+        name="get_return",
+        arguments={"ticker": "AAPL", "start_date": "2022-01-01", "end_date": "2022-12-31"},
+    )
+    llm = _ScriptedLLM(
+        [
+            LLMResponse(content=None, tool_calls=[tool_call]),
+            LLMResponse(content="AAPL returned 5% in 2022.", tool_calls=[]),
+        ]
+    )
+
+    tool_trace: list[dict] = []
+    answer = orch.run_agent_loop(llm, _base_messages(), tool_trace=tool_trace)
+
+    assert answer == "AAPL returned 5% in 2022."
+    assert tool_trace == [
+        {
+            "name": "get_return",
+            "arguments": {"ticker": "AAPL", "start_date": "2022-01-01", "end_date": "2022-12-31"},
+            "result": fake_result,
+        }
+    ]
+
+
+def test_tool_trace_stays_empty_when_no_tool_is_called():
+    llm = _ScriptedLLM([LLMResponse(content="AAPL rose 5% in 2022.", tool_calls=[])])
+
+    tool_trace: list[dict] = []
+    orch.run_agent_loop(llm, _base_messages(), tool_trace=tool_trace)
+
+    assert tool_trace == []
+
+
 def test_execute_tool_handles_unknown_tool_name():
     result = orch._execute_tool("not_a_real_tool", {})
     assert result == {"error": "Unknown tool: not_a_real_tool"}
